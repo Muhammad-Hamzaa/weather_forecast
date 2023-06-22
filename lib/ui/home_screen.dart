@@ -5,6 +5,7 @@ import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
+
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
@@ -12,10 +13,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String temperature = '';
-  String humidity = '';
-  String windSpeed = '';
-  String weatherDescription = '';
+
+  late String temperature = '';
+  late String humidity;
+  late String windSpeed;
+  late String weatherDescription;
   bool isCelsius = true;
   List<WeatherForecast> forecastList = [];
 
@@ -27,78 +29,84 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchWeatherData() async {
-    // Retrieve the user's current location
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
-    // Obtain the latitude and longitude of the user's location
-    double latitude = position.latitude;
-    double longitude = position.longitude;
+      double latitude = position.latitude;
+      double longitude = position.longitude;
 
-    // Make a request to the weather API using the obtained coordinates
-    String apiKey = 'YOUR_WEATHER_API_KEY';
-    String url = 'https://api.example.com/weather?lat=$latitude&lon=$longitude&appid=$apiKey';
-    http.Response response = await http.get(Uri.parse(url));
+      String apiKey = 'YOUR_WEATHER_API_KEY';
+      String url =
+          'https://api.example.com/weather?lat=$latitude&lon=$longitude&appid=$apiKey';
+      http.Response response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      // Parse the JSON response
-      Map<String, dynamic> jsonData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonData = json.decode(response.body);
 
-      // Extract the weather information
-      setState(() {
-        temperature = jsonData['main']['temp'].toString();
-        humidity = jsonData['main']['humidity'].toString();
-        windSpeed = jsonData['wind']['speed'].toString();
-        weatherDescription = jsonData['weather'][0]['description'];
-      });
-    } else {
+        setState(() {
+          temperature = jsonData['main']['temp'].toString();
+          humidity = jsonData['main']['humidity'].toString();
+          windSpeed = jsonData['wind']['speed'].toString();
+          weatherDescription = jsonData['weather'][0]['description'];
+        });
+      } else {
+        setState(() {
+          temperature = 'N/A';
+          humidity = 'N/A';
+          windSpeed = 'N/A';
+          weatherDescription = 'Failed to fetch weather data';
+        });
+      }
+    } catch (e) {
       setState(() {
         temperature = 'N/A';
         humidity = 'N/A';
         windSpeed = 'N/A';
-        weatherDescription = 'Failed to fetch weather data';
+        weatherDescription = 'Error occurred: ${e.toString()}';
       });
     }
   }
 
   Future<void> fetchForecastData() async {
-    // Retrieve the user's current location
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
-    // Obtain the latitude and longitude of the user's location
-    double latitude = position.latitude;
-    double longitude = position.longitude;
+      double latitude = position.latitude;
+      double longitude = position.longitude;
 
-    // Make a request to the forecast API using the obtained coordinates
-    String apiKey = 'YOUR_FORECAST_API_KEY';
-    String url = 'https://api.example.com/forecast?lat=$latitude&lon=$longitude&appid=$apiKey';
-    http.Response response = await http.get(Uri.parse(url));
+      String apiKey = 'YOUR_FORECAST_API_KEY';
+      String url =
+          'https://api.example.com/forecast?lat=$latitude&lon=$longitude&appid=$apiKey';
+      http.Response response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      // Parse the JSON response
-      Map<String, dynamic> jsonData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonData = json.decode(response.body);
 
-      // Extract the forecast information for the next 5 days
-      List<dynamic> forecastData = jsonData['list'];
-      List<WeatherForecast> forecasts = [];
+        List<dynamic> forecastData = jsonData['list'];
+        List<WeatherForecast> forecasts = [];
 
-      for (var data in forecastData) {
-        WeatherForecast forecast = WeatherForecast(
-          date: DateTime.fromMillisecondsSinceEpoch(data['dt'] * 1000),
-          temperature: data['main']['temp'].toDouble(),
-          weatherDescription: data['weather'][0]['description'],
-        );
-        forecasts.add(forecast);
+        for (var data in forecastData) {
+          WeatherForecast forecast = WeatherForecast(
+            date: DateTime.fromMillisecondsSinceEpoch(data['dt'] * 1000),
+            temperature: data['main']['temp'].toDouble(),
+            weatherDescription: data['weather'][0]['description'],
+          );
+          forecasts.add(forecast);
+        }
+
+        setState(() {
+          forecastList = forecasts;
+        });
+      } else {
+        setState(() {
+          forecastList = [];
+        });
       }
-
-      setState(() {
-        forecastList = forecasts;
-      });
-    } else {
-      // Failed to fetch forecast data
+    } catch (e) {
       setState(() {
         forecastList = [];
       });
@@ -124,15 +132,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Weather App'),
+        backgroundColor: Colors.deepPurple,
+        title: const Text('Weather App'),
+        centerTitle: true,
       ),
       body: Column(
         children: [
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 'Temperature Unit: ',
                 style: TextStyle(fontSize: 16),
               ),
@@ -140,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: toggleTemperatureUnit,
                 child: Text(
                   isCelsius ? 'Celsius' : 'Fahrenheit',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -148,12 +158,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Expanded(
             child: ListView(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
                   child: Text(
                     'Current Weather',
                     style: TextStyle(
@@ -163,22 +173,23 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 ListTile(
-                  leading: Icon(Icons.wb_sunny, size: 80),
+                  leading: const Icon(Icons.wb_sunny, size: 80),
                   title: Text(
-                    'Temperature: ${getTemperatureDisplay(double.parse(temperature))}',
-                    style: TextStyle(fontSize: 18),
+                    'Temperature: ${temperature != null ? getTemperatureDisplay(double.tryParse(temperature) ?? 0.0) : 'N/A'}',
+                    style: const TextStyle(fontSize: 18),
                   ),
+
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Humidity: $humidity%', style: TextStyle(fontSize: 18)),
-                      Text('Wind Speed: $windSpeed km/h', style: TextStyle(fontSize: 18)),
-                      Text('Weather Description: $weatherDescription', style: TextStyle(fontSize: 18)),
+                      Text('Humidity: $humidity%', style: const TextStyle(fontSize: 18)),
+                      Text('Wind Speed: $windSpeed km/h', style: const TextStyle(fontSize: 18)),
+                      Text('Weather Description: $weatherDescription', style: const TextStyle(fontSize: 18)),
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
                   child: Text(
                     '5-Day Forecast',
                     style: TextStyle(
@@ -189,22 +200,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 ListView.builder(
                   shrinkWrap: true,
-                  physics: ClampingScrollPhysics(),
+                  physics: const ClampingScrollPhysics(),
                   itemCount: forecastList.length,
                   itemBuilder: (context, index) {
                     WeatherForecast forecast = forecastList[index];
                     return ListTile(
                       leading: Text(
                         forecast.date.day.toString(),
-                        style: TextStyle(fontSize: 18),
+                        style: const TextStyle(fontSize: 18),
                       ),
                       title: Text(
                         'Temperature: ${getTemperatureDisplay(forecast.temperature)}',
-                        style: TextStyle(fontSize: 18),
+                        style: const TextStyle(fontSize: 18),
                       ),
                       subtitle: Text(
                         'Weather Description: ${forecast.weatherDescription}',
-                        style: TextStyle(fontSize: 18),
+                        style: const TextStyle(fontSize: 18),
                       ),
                     );
                   },
@@ -230,8 +241,8 @@ class WeatherForecast {
   });
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: HomeScreen(),
-  ));
-}
+// void main() {
+//   runApp(const MaterialApp(
+//     home: HomeScreen(),
+//   ));
+// }
