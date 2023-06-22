@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_forecast/ui/home_screen.dart';
 
 void main(){
   runApp(MyApp());
@@ -16,11 +17,13 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text("Weather App"),
-        ),
-      ),
+      initialRoute: HomeScreen.id,
+
+      routes: {
+        HomeScreen.id: (context) =>  HomeScreen(),
+      },
+
+
     );
   }
 }
