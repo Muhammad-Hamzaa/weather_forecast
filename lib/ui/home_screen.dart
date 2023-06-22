@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -333,49 +334,116 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const ClampingScrollPhysics(),
-                  itemCount: forecastList.length,
-                  itemBuilder: (context, index) {
-                    WeatherForecast forecast = forecastList[index];
-                    return Card(
-                      elevation: 2,
-                      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: ListTile(
-                        leading: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.deepPurple.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          child: Text(
-                            forecast.date.day.toString(),
-                            style: TextStyle(fontSize: 18, color: Colors.deepPurple),
-                          ),
-                        ),
-                        title: Text(
-                          'Temperature: ${getTemperatureDisplay(forecast.temperature)}',
-                          style: TextStyle(fontSize: 18, color: Colors.deepPurple),
-                        ),
-                        subtitle: Text(
-                          'Weather Description: ${forecast.weatherDescription}',
-                          style: TextStyle(fontSize: 18, color: Colors.deepPurple),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+               Column(
+                 children: [
+                   Container(
+                     height: 50,
+                     decoration: BoxDecoration(
+                       color: Colors.white,
+                       borderRadius: BorderRadius.circular(10),
+                       boxShadow: [
+                         BoxShadow(
+                           color: Colors.purple.withOpacity(0.3),
+                           spreadRadius: 2,
+                           blurRadius: 4,
+                           offset: Offset(0, 2),
+                         ),
+                       ],
+                     ),
+                     child: TextButton(
+                       onPressed: () {
+                         DatePicker.showDatePicker(context,
+                             showTitleActions: true,
+                             minTime: DateTime(2018, 3, 5),
+                             maxTime: DateTime(2023, 6, 22), onChanged: (date) {
+                               print('change $date');
+                             }, onConfirm: (date) {
+                               print('confirm $date');
+                             }, currentTime: DateTime.now(), locale: LocaleType.en);
+                       },
+                       child: Text(
+                         'show date time picker',
+                         style: TextStyle(color: Colors.blue),
+                       ),
+                     ),
+                   )
+                 ],
+               )
+
               ],
             ),
           ),
 
         ],
       ),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        shape: CircularNotchedRectangle(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.home,
+                color: Colors.purple,
+              ),
+              onPressed: () {
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.favorite,
+                color: Colors.purple,
+              ),
+              onPressed: () {},
+            ),
+            SizedBox(width: 32),
+            IconButton(
+              icon: Icon(
+                Icons.location_city,
+                color: Colors.purple,
+              ),
+              onPressed: () {
+
+
+              },
+            ),
+            SizedBox(width: 32),
+            IconButton(
+              icon: Icon(
+                Icons.share,
+                color: Colors.purple,
+              ),
+              onPressed: () {
+
+
+              },
+            ),
+            SizedBox(width: 32),
+            IconButton(
+              icon: Icon(
+                Icons.settings,
+                color: Colors.purple,
+              ),
+              onPressed: () {
+
+
+              },
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.purpleAccent,
+        child: Icon(Icons.add),
+        onPressed: () {
+
+
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
+
   }
 }
 
@@ -390,9 +458,3 @@ class WeatherForecast {
     required this.weatherDescription,
   });
 }
-
-// void main() {
-//   runApp(const MaterialApp(
-//     home: HomeScreen(),
-//   ));
-// }
