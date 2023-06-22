@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:share/share.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -16,8 +17,13 @@ class _HomeScreenState extends State<HomeScreen> {
   String humidity = '';
   String windSpeed = '';
   String weatherDescription = '';
+  String uvIndex = '';
+  String sunriseTime = '';
+  String sunsetTime = '';
+  String precipitationChance = '';
   bool isCelsius = true;
   List<WeatherForecast> forecastList = [];
+  List<String> favoriteLocations = [];
 
   @override
   void initState() {
@@ -51,6 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
         humidity = jsonData['main']['humidity'].toString();
         windSpeed = jsonData['wind']['speed'].toString();
         weatherDescription = jsonData['weather'][0]['description'];
+        uvIndex = jsonData['uvIndex'].toString();
+        sunriseTime = jsonData['sys']['sunrise'].toString();
+        sunsetTime = jsonData['sys']['sunset'].toString();
+        precipitationChance = jsonData['precipitation']['chance'].toString();
       });
     } else {
       setState(() {
@@ -58,6 +68,10 @@ class _HomeScreenState extends State<HomeScreen> {
         humidity = 'N/A';
         windSpeed = 'N/A';
         weatherDescription = 'Failed to fetch weather data';
+        uvIndex = 'N/A';
+        sunriseTime = 'N/A';
+        sunsetTime = 'N/A';
+        precipitationChance = 'N/A';
       });
     }
   }
@@ -120,6 +134,32 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void addToFavorites() async {
+    // Retrieve the user's current location
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    // Obtain the latitude and longitude of the user's location
+    double latitude = position.latitude;
+    double longitude = position.longitude;
+
+    if (!favoriteLocations.contains('$latitude,$longitude')) {
+      favoriteLocations.add('$latitude,$longitude');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Location added to favorites')),
+      );
+    }
+  }
+
+  void shareForecast() {
+    String forecast = '';
+    for (var data in forecastList) {
+      forecast += '${data.date.day.toString()}: ${getTemperatureDisplay(data.temperature)} - ${data.weatherDescription}\n';
+    }
+    Share.share('Weather forecast:\n\n$forecast');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -174,6 +214,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text('Humidity: $humidity%', style: TextStyle(fontSize: 18)),
                       Text('Wind Speed: $windSpeed km/h', style: TextStyle(fontSize: 18)),
                       Text('Weather Description: $weatherDescription', style: TextStyle(fontSize: 18)),
+                      Text('UV Index: $uvIndex', style: TextStyle(fontSize: 18)),
+                      Text('Sunrise: $sunriseTime', style: TextStyle(fontSize: 18)),
+                      Text('Sunset: $sunsetTime', style: TextStyle(fontSize: 18)),
+                      Text('Precipitation Chance: $precipitationChance%', style: TextStyle(fontSize: 18)),
                     ],
                   ),
                 ),
@@ -212,6 +256,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: addToFavorites,
+                child: Text('Add to Favorites'),
+              ),
+              SizedBox(width: 16),
+              ElevatedButton(
+                onPressed: shareForecast,
+                child: Text('Share Forecast'),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -228,10 +286,4 @@ class WeatherForecast {
     required this.temperature,
     required this.weatherDescription,
   });
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: HomeScreen(),
-  ));
 }
