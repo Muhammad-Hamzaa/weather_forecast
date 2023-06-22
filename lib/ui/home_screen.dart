@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -19,7 +20,33 @@ class _HomeScreenState extends State<HomeScreen> {
   late String windSpeed;
   late String weatherDescription;
   bool isCelsius = true;
-  List<WeatherForecast> forecastList = [];
+  List<WeatherForecast> forecastList = [
+    WeatherForecast(
+      date: DateTime.now().add(Duration(days: 1)),
+      temperature: 25.0,
+      weatherDescription: 'Sunny',
+    ),
+    WeatherForecast(
+      date: DateTime.now().add(Duration(days: 2)),
+      temperature: 22.5,
+      weatherDescription: 'Cloudy',
+    ),
+    WeatherForecast(
+      date: DateTime.now().add(Duration(days: 3)),
+      temperature: 20.0,
+      weatherDescription: 'Rainy',
+    ),
+    WeatherForecast(
+      date: DateTime.now().add(Duration(days: 4)),
+      temperature: 18.0,
+      weatherDescription: 'Thunderstorms',
+    ),
+    WeatherForecast(
+      date: DateTime.now().add(Duration(days: 5)),
+      temperature: 23.5,
+      weatherDescription: 'Partly Cloudy',
+    ),
+  ];
 
   @override
   void initState() {
@@ -132,69 +159,177 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
-        title: const Text('Weather App'),
+        backgroundColor: Colors.purple,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cloud,
+              color: Colors.white,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Weather App',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
         centerTitle: true,
       ),
       body: Column(
         children: [
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Temperature Unit: ',
-                style: TextStyle(fontSize: 16),
-              ),
-              TextButton(
-                onPressed: toggleTemperatureUnit,
-                child: Text(
-                  isCelsius ? 'Celsius' : 'Fahrenheit',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
                   ),
-                ),
+                ],
               ),
-            ],
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.thermostat_rounded,
+                        color: Colors.purpleAccent,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.purpleAccent,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.purple.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          'Temperature Unit:',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Montserrat',
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Fahrenheit',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Montserrat',
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Transform.scale(
+                        scale: 0.8,
+                        child: CupertinoSwitch(
+                          value: isCelsius,
+                          onChanged: (value) => toggleTemperatureUnit(),
+                          activeColor: Colors.purpleAccent,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Celsius',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Montserrat',
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
+
+
           const SizedBox(height: 16),
           Expanded(
             child: ListView(
               children: [
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
                   child: Text(
                     'Current Weather',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple,
                     ),
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.wb_sunny, size: 80),
-                  title: Text(
-                    'Temperature: ${temperature != null ? getTemperatureDisplay(double.tryParse(temperature) ?? 0.0) : 'N/A'}',
-                    style: const TextStyle(fontSize: 18),
+                Card(
+                  elevation: 4,
+                  margin: const EdgeInsets.all(8.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Humidity: $humidity%', style: const TextStyle(fontSize: 18)),
-                      Text('Wind Speed: $windSpeed km/h', style: const TextStyle(fontSize: 18)),
-                      Text('Weather Description: $weatherDescription', style: const TextStyle(fontSize: 18)),
-                    ],
+                  child: ListTile(
+                    leading: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      child: const Icon(Icons.wb_sunny, size: 40, color: Colors.deepPurple),
+                    ),
+                    title: Text(
+                      'Temperature: ${temperature != null ? getTemperatureDisplay(double.tryParse(temperature) ?? 0.0) : 'N/A'}',
+                      style: TextStyle(fontSize: 18, color: Colors.deepPurple),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Humidity: $humidity%', style: TextStyle(fontSize: 18, color: Colors.deepPurple)),
+                        Text('Wind Speed: $windSpeed km/h', style: TextStyle(fontSize: 18, color: Colors.deepPurple)),
+                        Text('Weather Description: $weatherDescription', style: TextStyle(fontSize: 18, color: Colors.deepPurple)),
+                      ],
+                    ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
                   child: Text(
                     '5-Day Forecast',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple,
                     ),
                   ),
                 ),
@@ -204,18 +339,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: forecastList.length,
                   itemBuilder: (context, index) {
                     WeatherForecast forecast = forecastList[index];
-                    return ListTile(
-                      leading: Text(
-                        forecast.date.day.toString(),
-                        style: const TextStyle(fontSize: 18),
+                    return Card(
+                      elevation: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      title: Text(
-                        'Temperature: ${getTemperatureDisplay(forecast.temperature)}',
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                      subtitle: Text(
-                        'Weather Description: ${forecast.weatherDescription}',
-                        style: const TextStyle(fontSize: 18),
+                      child: ListTile(
+                        leading: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.deepPurple.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: Text(
+                            forecast.date.day.toString(),
+                            style: TextStyle(fontSize: 18, color: Colors.deepPurple),
+                          ),
+                        ),
+                        title: Text(
+                          'Temperature: ${getTemperatureDisplay(forecast.temperature)}',
+                          style: TextStyle(fontSize: 18, color: Colors.deepPurple),
+                        ),
+                        subtitle: Text(
+                          'Weather Description: ${forecast.weatherDescription}',
+                          style: TextStyle(fontSize: 18, color: Colors.deepPurple),
+                        ),
                       ),
                     );
                   },
@@ -223,6 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+
         ],
       ),
     );
